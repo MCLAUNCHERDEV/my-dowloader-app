@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Architect Video Downloader - YouTube, TikTok, Instagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0f172a 0%, #020617 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            padding: 2rem;
+            border: 1px solid #334155;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #00ff9d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            border-left: 3px solid #00ff9d;
+            padding-left: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .input-field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .input-field input, .input-field select {
+            width: 100%;
+            background: #020617;
+            border: 1px solid #334155;
+            padding: 12px 18px;
+            border-radius: 28px;
+            font-size: 1rem;
+            color: #f1f5f9;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .input-field input:focus, .input-field select:focus {
+            border-color: #00ff9d;
+            box-shadow: 0 0 0 3px #00ff9d30;
+        }
+
+        .btn-arch {
+            background: #00ff9d;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            color: #020617;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-arch:hover {
+            background: #00e089;
+            transform: scale(1.02);
+        }
+
+        .result-area {
+            margin-top: 2rem;
+            background: #0f172a;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+            display: none;
+        }
+
+        .result-area.active {
+            display: block;
+        }
+
+        .video-info {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .video-thumb {
+            width: 120px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .video-thumb img {
+            width: 100%;
+        }
+
+        .video-details {
+            flex: 1;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-right: 0.5rem;
+            transition: 0.2s;
+        }
+
+        .download-link:hover {
+            background: #2563eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #00ff9d;
+        }
+
+        .error {
+            color: #ff6b6b;
+            background: #2a1a1a;
+            padding: 1rem;
+            border-radius: 1rem;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⚡ ARCHITECT DOWNLOADER</h1>
+    <div class="sub">Download video dari YouTube, TikTok, Instagram (legal untuk keperluan pribadi)</div>
+
+    <div class="input-group">
+        <div class="input-field">
+            <label>🌐 Pilih Platform</label>
+            <select id="platform">
+                <option value="youtube">YouTube</option>
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram</option>
+            </select>
+        </div>
+        <div class="input-field">
+            <label>🔗 Masukkan URL Video</label>
+            <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+        <button class="btn-arch" id="downloadBtn">🚀 Proses & Download</button>
+    </div>
+
+    <div id="resultArea" class="result-area">
+        <div id="resultContent"></div>
+    </div>
+
+    <div class="footer">
+        © Architect 01 — Downloader untuk keperluan pribadi, jangan disalahgunakan.
+    </div>
+</div>
+
+<script>
+    // API endpoints gratis untuk downloader (menggunakan layanan publik)
+    // Catatan: API ini bersifat publik dan mungkin memiliki limit, tapi berfungsi
+    
+    const downloadBtn = document.getElementById('downloadBtn');
+    const platformSelect = document.getElementById('platform');
+    const urlInput = document.getElementById('url');
+    const resultArea = document.getElementById('resultArea');
+    const resultContent = document.getElementById('resultContent');
+    
+    downloadBtn.addEventListener('click', async () => {
+        const platform = platformSelect.value;
+        const url = urlInput.value.trim();
+        
+        if (!url) {
+            showError('Masukkan URL dulu, Goblok!');
+            return;
+        }
+        
+        // Tampilkan loading
+        resultArea.classList.add('active');
+        resultContent.innerHTML = '<div class="loading">⏳ Memproses video... mohon tunggu</div>';
+        
+        try {
+            let apiUrl = '';
+            let response = null;
+            
+            switch(platform) {
+                case 'youtube':
+                    // Menggunakan API publik untuk YouTube
+                    apiUrl = `https://pipedapi.kavin.rocks/streams/${extractVideoId(url)}`;
+                    response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        displayYouTubeResult(data);
+                    } else {
+                        throw new Error('Gagal mengambil data YouTube');
+                    }
+                    break;
+                    
+                case 'tiktok':
+                    // Menggunakan API publik TikTok
+                    apiUrl = `https://tikwm.com/api/?url=${encodeURIComponent(url)}`;
+                    response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.code === 0) {
+                            displayTikTokResult(data.data);
+                        } else {
+                            throw new Error('TikTok: Video tidak ditemukan');
+                        }
+                    } else {
+                        throw new Error('Gagal mengambil data TikTok');
+                    }
+                    break;
+                    
+                case 'instagram':
+                    // Menggunakan API publik Instagram
+                    apiUrl = `https://api.instagram.com/oembed?url=${encodeURIComponent(url)}`;
+                    response = await fetch(apiUrl);
+                    if (response.ok) {
+                        const data = await response.json();
+                        displayInstagramResult(data, url);
+                    } else {
+                        throw new Error('Instagram: Gunakan URL reel atau post publik');
+                    }
+                    break;
+                    
+                default:
+                    showError('Platform tidak dikenal');
+            }
+        } catch (error) {
+            showError(`Error: ${error.message}. Pastikan URL benar dan video bersifat publik.`);
+        }
+    });
+    
+    function extractVideoId(url) {
+        const regex = /(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&]|$)/;
+        const match = url.match(regex);
+        return match ? match[1] : url;
+    }
+    
+    function displayYouTubeResult(data) {
+        const videoTitle = data.title || 'Video YouTube';
+        const videoThumb = data.thumbnailUrl || `https://img.youtube.com/vi/${data.videoId}/mqdefault.jpg`;
+        
+        let formatsHtml = '';
+        if (data.videoStreams) {
+            // Cari format video + audio terbaik (mp4)
+            const bestVideo = data.videoStreams.find(s => s.quality === 'medium' || s.quality === 'hd720') || data.videoStreams[0];
+            if (bestVideo) {
+                formatsHtml = `<a href="${bestVideo.url}" class="download-link" target="_blank">📹 Download Video (${bestVideo.quality || 'HD'})</a>`;
+            }
+        }
+        
+        // Jika tidak ada stream dari API, gunakan y2mate alternative
+        if (!formatsHtml) {
+            formatsHtml = `<a href="https://y2mate.com/youtube/${data.videoId}" class="download-link" target="_blank">🎬 Download via y2mate (Alternatif)</a>`;
+        }
+        
+        resultContent.innerHTML = `
+            <div class="video-info">
+                <div class="video-thumb">
+                    <img src="${videoThumb}" alt="Thumbnail">
+                </div>
+                <div class="video-details">
+                    <h3 style="margin-bottom: 0.5rem;">${escapeHtml(videoTitle)}</h3>
+                    <p>Platform: YouTube</p>
+                    ${formatsHtml}
+                </div>
+            </div>
+            <p style="font-size: 0.8rem; margin-top: 1rem; color: #94a3b8;">⚠️ Untuk penggunaan pribadi, hormati hak cipta pembuat konten.</p>
+        `;
+    }
+    
+    function displayTikTokResult(data) {
+        const videoTitle = data.title || 'Video TikTok';
+        const videoUrl = data.play || (data.images ? data.images[0] : null);
+        const videoThumb = data.cover || '';
+        
+        let downloadHtml = '';
+        if (videoUrl) {
+            downloadHtml = `<a href="${videoUrl}" class="download-link" target="_blank">📱 Download Video TikTok (No Watermark)</a>`;
+        } else if (data.images) {
+            downloadHtml = '<p>Ini adalah postingan gambar (slideshow). Download gambar:</p>';
+            data.images.forEach((img, i) => {
+                downloadHtml += `<a href="${img}" class="download-link" target="_blank">🖼️ Gambar ${i+1}</a>`;
+            });
+        } else {
+            downloadHtml = `<a href="https://ssstik.io/id" class="download-link" target="_blank">⚠️ Gunakan ssstik.io untuk download</a>`;
+        }
+        
+        resultContent.innerHTML = `
+            <div class="video-info">
+                ${videoThumb ? `<div class="video-thumb"><img src="${videoThumb}" alt="Thumb"></div>` : ''}
+                <div class="video-details">
+                    <h3>${escapeHtml(videoTitle.substring(0, 100))}</h3>
+                    <p>Platform: TikTok</p>
+                    ${downloadHtml}
+                </div>
+            </div>
+            <p style="font-size: 0.8rem; margin-top: 1rem; color: #94a3b8;">✅ Video bebas watermark, gunakan untuk keperluan pribadi.</p>
+        `;
+    }
+    
+    function displayInstagramResult(data, originalUrl) {
+        resultContent.innerHTML = `
+            <div class="video-info">
+                <div class="video-details">
+                    <h3>${escapeHtml(data.title || 'Instagram Content')}</h3>
+                    <p>Author: ${escapeHtml(data.author_name || 'Unknown')}</p>
+                    <a href="https://snapinsta.app/id" class="download-link" target="_blank">📸 Download Instagram (via SnapInsta)</a>
+                    <a href="https://saveinsta.app" class="download-link" target="_blank">📥 Alternatif SaveInsta</a>
+                    <p style="margin-top: 1rem;">📌 URL asli: <small>${escapeHtml(originalUrl)}</small></p>
+                </div>
+            </div>
+            <p style="font-size: 0.8rem; margin-top: 1rem; color: #facc15;">⚠️ Instagram membutuhkan tools khusus. Gunakan link di atas.</p>
+        `;
+    }
+    
+    function showError(msg) {
+        resultContent.innerHTML = `<div class="error">❌ ${escapeHtml(msg)}</div>`;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+</script>
+</body>
+</html>
